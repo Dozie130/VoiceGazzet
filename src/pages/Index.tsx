@@ -1,6 +1,8 @@
 
 import { Header } from "@/components/Header";
 import { BreakingNewsBanner } from "@/components/BreakingNewsBanner";
+import { LiveNewsTicker } from "@/components/LiveNewsTicker";
+import { HeroSection } from "@/components/HeroSection";
 import { FeaturedArticles } from "@/components/FeaturedArticles";
 import { CategorySection } from "@/components/CategorySection";
 import { AdPlaceholder } from "@/components/AdPlaceholder";
@@ -204,14 +206,18 @@ export default function Index() {
   return (
     <>
       <Header />
+      <LiveNewsTicker />
       <BreakingNewsBanner />
       <main>
+        {/* Hero Section */}
+        <HeroSection />
+        
         {/* Featured Articles Section */}
         <FeaturedArticles />
         
         {/* Ad Banner */}
         <div className="container mx-auto px-4 py-4">
-          <AdPlaceholder type="banner" />
+          <AdPlaceholder type="banner" id="main-banner" />
         </div>
         
         {/* Categories Sections */}
@@ -224,7 +230,7 @@ export default function Index() {
         
         <div className="py-4 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4">
-            <AdPlaceholder type="inline" />
+            <AdPlaceholder type="inline" id="politics-ad" />
           </div>
         </div>
         
@@ -237,7 +243,7 @@ export default function Index() {
         
         <div className="py-4">
           <div className="container mx-auto px-4">
-            <AdPlaceholder type="inline" />
+            <AdPlaceholder type="inline" id="business-ad" />
           </div>
         </div>
         
@@ -250,7 +256,7 @@ export default function Index() {
         
         <div className="py-4 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4">
-            <AdPlaceholder type="inline" />
+            <AdPlaceholder type="inline" id="sports-ad" />
           </div>
         </div>
         
