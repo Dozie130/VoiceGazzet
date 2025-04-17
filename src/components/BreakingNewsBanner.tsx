@@ -1,19 +1,40 @@
 
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
-
-const breakingNews = [
-  "Supreme Court delivers landmark ruling on digital privacy case",
-  "Major tech company announces breakthrough in quantum computing",
-  "International climate agreement reached after marathon negotiations",
-];
+import { fetchBreakingNews, startNewsRefreshInterval } from "@/services/newsService";
 
 export function BreakingNewsBanner() {
+  const [breakingNews, setBreakingNews] = useState<string[]>([
+    "Supreme Court delivers landmark ruling on digital privacy case",
+    "Major tech company announces breakthrough in quantum computing",
+    "International climate agreement reached after marathon negotiations",
+  ]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
+  // Fetch breaking news on component mount
   useEffect(() => {
-    // Rotate through breaking news headlines
+    const loadNews = async () => {
+      try {
+        const newsItems = await fetchBreakingNews();
+        setBreakingNews(newsItems);
+      } catch (error) {
+        console.error("Failed to load breaking news:", error);
+      }
+    };
+
+    loadNews();
+    
+    // Set up refresh interval and cleanup on unmount
+    const cleanup = startNewsRefreshInterval();
+    return cleanup;
+  }, []);
+
+  // Rotate through breaking news headlines
+  useEffect(() => {
+    if (isBannerDismissed) return;
+    
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
@@ -23,18 +44,17 @@ export function BreakingNewsBanner() {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [breakingNews.length, isBannerDismissed]);
 
   const handleClose = () => {
     setIsVisible(false);
     // Hide completely after animation
     setTimeout(() => {
-      const banner = document.getElementById("breaking-news-banner");
-      if (banner) banner.style.display = "none";
+      setIsBannerDismissed(true);
     }, 300);
   };
 
-  if (!isVisible && document.getElementById("breaking-news-banner")?.style.display === "none") {
+  if (isBannerDismissed) {
     return null;
   }
 

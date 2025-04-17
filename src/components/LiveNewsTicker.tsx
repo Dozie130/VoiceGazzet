@@ -2,22 +2,41 @@
 import { useEffect, useState, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Radio } from "lucide-react";
-
-// Mock live news data
-const liveNewsItems = [
-  "Stock markets reach all-time high as tech sector booms",
-  "Scientists discover potential breakthrough in renewable energy storage",
-  "Olympic committee announces host city for 2036 Summer Games",
-  "Global leaders agree on new climate change framework",
-  "Health experts release guidelines for post-pandemic workplace safety",
-  "Major automaker announces shift to all-electric vehicle production by 2030"
-];
+import { fetchBreakingNews } from "@/services/newsService";
 
 export function LiveNewsTicker() {
+  const [liveNewsItems, setLiveNewsItems] = useState<string[]>([
+    "Stock markets reach all-time high as tech sector booms",
+    "Scientists discover potential breakthrough in renewable energy storage",
+    "Olympic committee announces host city for 2036 Summer Games",
+    "Global leaders agree on new climate change framework",
+    "Health experts release guidelines for post-pandemic workplace safety",
+    "Major automaker announces shift to all-electric vehicle production by 2030"
+  ]);
+  
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const tickerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  
+  // Fetch live news on component mount and refresh every 10 minutes
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const newsItems = await fetchBreakingNews();
+        setLiveNewsItems(newsItems);
+      } catch (error) {
+        console.error("Failed to load news for ticker:", error);
+      }
+    };
+
+    loadNews();
+    
+    // Refresh news every 10 minutes
+    const refreshInterval = setInterval(loadNews, 10 * 60 * 1000);
+    
+    return () => clearInterval(refreshInterval);
+  }, []);
   
   // Automatically scroll news items
   useEffect(() => {
@@ -28,7 +47,7 @@ export function LiveNewsTicker() {
     }, 6000);
     
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, liveNewsItems.length]);
 
   // Reset animation when item changes
   useEffect(() => {
