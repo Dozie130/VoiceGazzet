@@ -1,50 +1,77 @@
 
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { fetchBreakingNews, startNewsRefreshInterval } from "@/services/newsService";
+import { fetchNews, startNewsRefreshInterval, NewsSource } from "@/services/newsService";
 
 export function BreakingNewsBanner() {
-  const [breakingNews, setBreakingNews] = useState<string[]>([
-    "Supreme Court delivers landmark ruling on digital privacy case",
-    "Major tech company announces breakthrough in quantum computing",
-    "International climate agreement reached after marathon negotiations",
+  const [breakingNews, setBreakingNews] = useState<{ text: string; source: NewsSource }[]>([
+    { text: "Supreme Court delivers landmark ruling on digital privacy case", source: "headlines" },
+    { text: "Nigerian tech startups secure record funding in first quarter", source: "nigeria" },
+    { text: "Pan-African trade agreement enters implementation phase", source: "africa" },
   ]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+  const [currentSource, setCurrentSource] = useState<NewsSource>("headlines");
+  const sources: NewsSource[] = ["headlines", "x", "worldwide", "africa", "nigeria"];
+  const sourceIndex = { current: 0 };
 
   // Fetch breaking news on component mount
   useEffect(() => {
-    const loadNews = async () => {
+    const loadAllNews = async () => {
       try {
-        const newsItems = await fetchBreakingNews();
-        setBreakingNews(newsItems);
+        const allNewsItems: { text: string; source: NewsSource }[] = [];
+        
+        for (const source of sources) {
+          const newsItems = await fetchNews(source);
+          const sourceItems = newsItems.map(item => ({ text: item, source }));
+          allNewsItems.push(...sourceItems);
+        }
+        
+        setBreakingNews(allNewsItems);
       } catch (error) {
         console.error("Failed to load breaking news:", error);
       }
     };
 
-    loadNews();
+    loadAllNews();
     
     // Set up refresh interval and cleanup on unmount
     const cleanup = startNewsRefreshInterval();
     return cleanup;
   }, []);
 
+  // Change news source every 40 seconds (after cycling through 5 headlines)
+  useEffect(() => {
+    if (isBannerDismissed) return;
+    
+    const rotateSource = () => {
+      sourceIndex.current = (sourceIndex.current + 1) % sources.length;
+      setCurrentSource(sources[sourceIndex.current]);
+    };
+    
+    const sourceInterval = setInterval(rotateSource, 40000);
+    
+    return () => clearInterval(sourceInterval);
+  }, [isBannerDismissed, sources.length]);
+
   // Rotate through breaking news headlines
   useEffect(() => {
     if (isBannerDismissed) return;
     
+    const currentSourceNews = breakingNews.filter(news => news.source === currentSource);
+    if (currentSourceNews.length === 0) return;
+    
     const interval = setInterval(() => {
       setIsVisible(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % breakingNews.length);
+        setCurrentIndex((prev) => (prev + 1) % currentSourceNews.length);
         setIsVisible(true);
       }, 500);
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [breakingNews.length, isBannerDismissed]);
+  }, [breakingNews, currentSource, isBannerDismissed]);
 
   const handleClose = () => {
     setIsVisible(false);
@@ -58,6 +85,22 @@ export function BreakingNewsBanner() {
     return null;
   }
 
+  // Get current news to display
+  const currentNewsItems = breakingNews.filter(news => news.source === currentSource);
+  const currentNewsItem = currentNewsItems[currentIndex % currentNewsItems.length] || breakingNews[0];
+
+  // Get source display name
+  const getSourceDisplay = (source: NewsSource): string => {
+    switch(source) {
+      case "headlines": return "Breaking News";
+      case "x": return "From X";
+      case "worldwide": return "World News";
+      case "africa": return "Africa News";
+      case "nigeria": return "Nigeria News";
+      default: return source;
+    }
+  };
+
   return (
     <div
       id="breaking-news-banner"
@@ -70,10 +113,10 @@ export function BreakingNewsBanner() {
           <div className="flex items-center space-x-3">
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 mr-2" />
-              <span className="font-bold uppercase text-xs">Breaking News</span>
+              <span className="font-bold uppercase text-xs">{getSourceDisplay(currentNewsItem.source)}</span>
             </div>
             <div className="h-4 w-px bg-white/30" />
-            <p className="text-sm font-medium">{breakingNews[currentIndex]}</p>
+            <p className="text-sm font-medium">{currentNewsItem.text}</p>
           </div>
           <button
             onClick={handleClose}

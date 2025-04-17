@@ -2,16 +2,21 @@
 import { useEffect, useState, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Radio } from "lucide-react";
-import { fetchBreakingNews } from "@/services/newsService";
+import { fetchNews, NewsSource } from "@/services/newsService";
+
+interface NewsItem {
+  text: string;
+  source: NewsSource;
+}
 
 export function LiveNewsTicker() {
-  const [liveNewsItems, setLiveNewsItems] = useState<string[]>([
-    "Stock markets reach all-time high as tech sector booms",
-    "Scientists discover potential breakthrough in renewable energy storage",
-    "Olympic committee announces host city for 2036 Summer Games",
-    "Global leaders agree on new climate change framework",
-    "Health experts release guidelines for post-pandemic workplace safety",
-    "Major automaker announces shift to all-electric vehicle production by 2030"
+  const [liveNewsItems, setLiveNewsItems] = useState<NewsItem[]>([
+    { text: "Stock markets reach all-time high as tech sector booms", source: "headlines" },
+    { text: "Scientists discover potential breakthrough in renewable energy storage", source: "worldwide" },
+    { text: "Olympic committee announces host city for 2036 Summer Games", source: "worldwide" },
+    { text: "Nigerian tech startups secure record funding in first quarter", source: "nigeria" },
+    { text: "Tech influencer shares first look at upcoming smartphone", source: "x" },
+    { text: "Pan-African trade agreement enters implementation phase", source: "africa" }
   ]);
   
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,21 +24,32 @@ export function LiveNewsTicker() {
   const tickerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
-  // Fetch live news on component mount and refresh every 10 minutes
+  // Fetch live news from all sources on component mount and refresh every 10 minutes
   useEffect(() => {
-    const loadNews = async () => {
+    const sources: NewsSource[] = ["headlines", "x", "worldwide", "africa", "nigeria"];
+    
+    const loadAllNews = async () => {
       try {
-        const newsItems = await fetchBreakingNews();
-        setLiveNewsItems(newsItems);
+        const allNewsItems: NewsItem[] = [];
+        
+        for (const source of sources) {
+          const newsItems = await fetchNews(source);
+          const sourceItems = newsItems.map(item => ({ text: item, source }));
+          allNewsItems.push(...sourceItems);
+        }
+        
+        // Shuffle the news items to mix different sources
+        const shuffledItems = allNewsItems.sort(() => Math.random() - 0.5);
+        setLiveNewsItems(shuffledItems);
       } catch (error) {
         console.error("Failed to load news for ticker:", error);
       }
     };
 
-    loadNews();
+    loadAllNews();
     
     // Refresh news every 10 minutes
-    const refreshInterval = setInterval(loadNews, 10 * 60 * 1000);
+    const refreshInterval = setInterval(loadAllNews, 10 * 60 * 1000);
     
     return () => clearInterval(refreshInterval);
   }, []);
@@ -61,6 +77,18 @@ export function LiveNewsTicker() {
 
   // Show fewer items on mobile
   const visibleNews = isMobile ? 1 : 3;
+  
+  // Get source display text
+  const getSourceDisplay = (source: NewsSource): string => {
+    switch(source) {
+      case "headlines": return "Breaking";
+      case "x": return "X";
+      case "worldwide": return "World";
+      case "africa": return "Africa";
+      case "nigeria": return "Nigeria";
+      default: return source;
+    }
+  };
   
   return (
     <div 
@@ -92,10 +120,13 @@ export function LiveNewsTicker() {
                 )
                 .map((item, index) => (
                   <div 
-                    key={`${item}-${index}`} 
-                    className="text-sm px-4 border-r border-border last:border-r-0 flex-shrink-0"
+                    key={`${item.text}-${index}`} 
+                    className="text-sm px-4 border-r border-border last:border-r-0 flex-shrink-0 flex items-center"
                   >
-                    {item}
+                    <span className="text-xs font-semibold uppercase mr-2 px-1.5 py-0.5 rounded bg-news-crimson text-white">
+                      {getSourceDisplay(item.source)}
+                    </span>
+                    {item.text}
                   </div>
                 ))
               }
