@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -51,6 +54,13 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				news: {
+					navy: '#0A1128',
+					crimson: '#DC3545',
+					gray: '#6C757D',
+					light: '#F8F9FA',
+					dark: '#212529'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
