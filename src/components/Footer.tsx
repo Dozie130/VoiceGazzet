@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Linkedin, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -44,11 +43,11 @@ export function Footer() {
           {/* Brand and subscription */}
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <span className="text-2xl font-bold">NewSphere</span>
+              <span className="text-2xl font-bold">Voice Gazette</span>
             </Link>
             <p className="text-white/80 mb-4 text-sm">
-              Your trusted source for breaking news and in-depth reporting on politics, 
-              business, technology, sports, and entertainment.
+              Your intelligent news platform delivering personalized, comprehensive reporting 
+              across politics, business, technology, sports, and entertainment.
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <p className="text-sm font-medium">Subscribe to our newsletter</p>
@@ -132,7 +131,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-6 text-center text-white/60 text-sm">
-          <p>© {new Date().getFullYear()} NewSphere. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Voice Gazette. All rights reserved.</p>
         </div>
       </div>
     </footer>
