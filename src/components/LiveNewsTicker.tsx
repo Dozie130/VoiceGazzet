@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Radio } from "lucide-react";
 import { fetchNews, NewsSource } from "@/services/newsService";
+import { Link } from "react-router-dom";
 
 interface NewsItem {
   text: string;
@@ -78,15 +79,21 @@ export function LiveNewsTicker() {
   // Show fewer items on mobile
   const visibleNews = isMobile ? 1 : 3;
   
-  // Get source display text
-  const getSourceDisplay = (source: NewsSource): string => {
+  // Get source display text and URLs
+  const getSourceInfo = (source: NewsSource): { text: string; url: string } => {
     switch(source) {
-      case "headlines": return "Breaking";
-      case "x": return "X";
-      case "worldwide": return "World";
-      case "africa": return "Africa";
-      case "nigeria": return "Nigeria";
-      default: return source;
+      case "headlines":
+        return { text: "Breaking", url: "/category/breaking" };
+      case "x":
+        return { text: "X", url: "/source/x" };
+      case "worldwide":
+        return { text: "World", url: "/category/world" };
+      case "africa":
+        return { text: "Africa", url: "/category/africa" };
+      case "nigeria":
+        return { text: "Nigeria", url: "/category/nigeria" };
+      default:
+        return { text: source, url: `/source/${source}` };
     }
   };
   
@@ -118,17 +125,23 @@ export function LiveNewsTicker() {
                     Math.max(0, visibleNews - (liveNewsItems.length - currentIndex))
                   )
                 )
-                .map((item, index) => (
-                  <div 
-                    key={`${item.text}-${index}`} 
-                    className="text-sm px-4 border-r border-border last:border-r-0 flex-shrink-0 flex items-center"
-                  >
-                    <span className="text-xs font-semibold uppercase mr-2 px-1.5 py-0.5 rounded bg-news-crimson text-white">
-                      {getSourceDisplay(item.source)}
-                    </span>
-                    {item.text}
-                  </div>
-                ))
+                .map((item, index) => {
+                  const sourceInfo = getSourceInfo(item.source);
+                  return (
+                    <div 
+                      key={`${item.text}-${index}`} 
+                      className="text-sm px-4 border-r border-border last:border-r-0 flex-shrink-0 flex items-center"
+                    >
+                      <Link
+                        to={sourceInfo.url}
+                        className="text-xs font-semibold uppercase mr-2 px-1.5 py-0.5 rounded bg-news-crimson text-white hover:bg-news-crimson/90 transition-colors"
+                      >
+                        {sourceInfo.text}
+                      </Link>
+                      {item.text}
+                    </div>
+                  );
+                })
               }
             </div>
           </div>
