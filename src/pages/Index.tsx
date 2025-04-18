@@ -1,4 +1,5 @@
 
+import { Heading, Newspaper, CalendarClock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { BreakingNewsBanner } from "@/components/BreakingNewsBanner";
 import { LiveNewsTicker } from "@/components/LiveNewsTicker";
@@ -209,8 +210,24 @@ export default function Index() {
       <LiveNewsTicker />
       <BreakingNewsBanner />
       <main>
+        {/* Headlines Section */}
+        <section className="container mx-auto px-4 py-6">
+          <div className="flex items-center mb-4">
+            <Newspaper className="mr-2 text-news-crimson" />
+            <h2 className="text-2xl font-bold">Latest Headlines</h2>
+          </div>
+        </section>
+
         {/* Hero Section */}
         <HeroSection />
+        
+        {/* Upcoming News Section */}
+        <section className="container mx-auto px-4 py-6">
+          <div className="flex items-center mb-4">
+            <CalendarClock className="mr-2 text-news-navy" />
+            <h2 className="text-2xl font-bold">Upcoming News</h2>
+          </div>
+        </section>
         
         {/* Featured Articles Section */}
         <FeaturedArticles />
@@ -271,3 +288,4 @@ export default function Index() {
     </>
   );
 }
+
