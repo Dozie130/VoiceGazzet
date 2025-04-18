@@ -6,8 +6,20 @@ import { CategorySection } from "@/components/CategorySection";
 import { Footer } from "@/components/Footer";
 import { useEffect, useState } from "react";
 
-// Mock data for different categories
-const categoryArticles = {
+// Define interface for article data
+interface Article {
+  id: number;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  date: string;
+  imageUrl: string;
+  isBreaking?: boolean; // Added optional isBreaking property
+}
+
+// Mock data for different categories as Record of category ID to array of articles
+const categoryArticles: Record<string, Article[]> = {
   politics: [
     {
       id: 101,
